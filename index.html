@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>tooltip</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<button class="btn-class">show tooltip</button>
+
+<button class="btn-class">show tooltip</button>
+
+<div class="tooltip-container">
+    <div class="tooltip"  data-btn="btn-class">
+        tooltip content
+    </div>
+</div>
+<script src="js/tooltip.js"></script>
+<script>
+    var tooltipController =  {
+        tooltips:[],
+        init: function() {
+            var elems = document.querySelectorAll('.tooltip');
+
+            for(var i = 0; i < elems.length; i++) {
+                this.tooltips.push(new Tooltip(elems[i]));
+                this.tooltips[i].init();
+            }
+        }
+    };
+    tooltipController.init();
+</script>
+</body>
+</html>
