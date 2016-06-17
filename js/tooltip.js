@@ -3,20 +3,40 @@ function Tooltip(elem) {
     this.dataBtn = [];
     this.buttonEl = [];
     this.buttonElCords = [];
+    this.elemCords = [];
     this.tooltipVisible = false;
 }
 
 Tooltip.prototype.init = function() {
+
     this.getDataBtn();
     this.getButtonEl(this.dataBtn);
     this.onButtonClick();
     this.setBtnCords();
-    this.getTooltipCords();
+
+    if(!this.isHidden(this.elem)) {
+        this.positioningElem();
+        this.setElemCords();
+        this.checkElemCords();
+    }
+
     if(this.tooltipVisible) {
         this.showTooltip();
     } else {
         this.hideTooltip();
     }
+
+    window.addEventListener('resize', function(){
+        this.setBtnCords();
+        this.setElemCords();
+        this.checkElemCords();
+        this.positioningElem();
+    }.bind(this));
+};
+
+
+Tooltip.prototype.isHidden = function(elem) {
+    return !elem.offsetWidth && !elem.offsetHeight;
 };
 
 Tooltip.prototype.getDataBtn = function() {
@@ -35,7 +55,6 @@ Tooltip.prototype.onButtonClick = function() {
   var self = this;
   for(var i = 0; i < this.buttonEl.length; i++) {
       this.buttonEl[i].addEventListener('click', function(){
-
           if(!self.tooltipVisible) {
               self.showTooltip();
           } else {
@@ -68,40 +87,67 @@ Tooltip.prototype.setBtnCords = function() {
     }
 };
 
-Tooltip.prototype.getTooltipCords = function() {
+Tooltip.prototype.setElemCords = function() {
+    var cords = {};
+        cords.left = this.elem.getBoundingClientRect().left;
+        cords.right = this.elem.getBoundingClientRect().right;
+        cords.top =  this.elem.getBoundingClientRect().top;
+        cords.bottom = this.elem.getBoundingClientRect().bottom;
+        this.elemCords.push(cords);
+};
+
+Tooltip.prototype.positioningElem = function() {
+
     for(var i = 0; i < this.buttonElCords.length; i++) {
         this.elem.style.top = this.buttonElCords[i].top + 'px';
 
 
         if (this.elem.classList.contains('left')) {
 
-            this.showTooltip();
-            this.elem.style.top = this.buttonElCords[i].top + 'px';
+            this.elem.style.top = this.buttonElCords[i].top - ((this.elem.offsetHeight / 2) - ((this.buttonElCords[i].bottom - this.buttonElCords[i].top) / 2)) + 'px';
             this.elem.style.left = this.buttonElCords[i].right - ((this.buttonElCords[i].right - this.buttonElCords[i].left) + this.elem.offsetWidth) + 'px';
-            this.hideTooltip();
+
+
 
         } else if(this.elem.classList.contains('right')) {
 
-            this.elem.style.top = this.buttonElCords[i].top + 'px';
+            this.elem.style.top = this.buttonElCords[i].top - ((this.elem.offsetHeight / 2) - ((this.buttonElCords[i].bottom - this.buttonElCords[i].top) / 2)) + 'px';
             this.elem.style.left = this.buttonElCords[i].right + 'px';
+
 
         } else if(this.elem.classList.contains('top')) {
 
-            this.showTooltip();
             this.elem.style.top = this.buttonElCords[i].top - this.elem.offsetHeight + 'px';
-            this.elem.style.left = this.buttonElCords[i].left + 'px';
-            this.hideTooltip();
+            this.elem.style.left = this.buttonElCords[i].left - ((this.elem.offsetWidth / 2) - ((this.buttonElCords[i].right - this.buttonElCords[i].left) / 2)) + 'px';
+
 
         } else if(this.elem.classList.contains('bottom')) {
 
-            this.showTooltip();
-            this.elem.style.top = this.buttonElCords[i].top +((this.buttonElCords[i].bottom - this.buttonElCords[i].top)) + 'px';
-            this.elem.style.left = this.buttonElCords[i].left + 'px';
-            this.hideTooltip();
 
-        } else {
+            this.elem.style.top = this.buttonElCords[i].top +((this.buttonElCords[i].bottom - this.buttonElCords[i].top)) + 'px';
+            this.elem.style.left = this.buttonElCords[i].left - ((this.elem.offsetWidth / 2) - ((this.buttonElCords[i].right - this.buttonElCords[i].left) / 2)) + 'px';
+
+
+        }  else {
             this.elem.style.top = this.buttonElCords[i].top + 'px';
             this.elem.style.left = this.buttonElCords[i].left + 'px';
         }
     }
+};
+
+
+Tooltip.prototype.checkElemCords = function() {
+   if(this.elemCords[0].top <= 0) {
+       this.toggleClass(this.elem, 'top', 'bottom');
+       this.positioningElem();
+   } else if(this.elemCords[0].left <= 0) {
+       this.toggleClass(this.elem, 'left', 'right');
+       this.positioningElem();
+   }
+};
+
+
+Tooltip.prototype.toggleClass = function(elem, oldClass, newClass) {
+    elem.classList.remove(oldClass);
+    elem.classList.add(newClass);
 };
