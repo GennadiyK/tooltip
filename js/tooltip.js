@@ -12,14 +12,19 @@ Tooltip.prototype.init = function() {
     this.getDataBtn();
     this.getButtonEl(this.dataBtn);
     this.onButtonClick();
-    this.setBtnCords();
+    this.checkDataAttrVisible();
 
+
+    //corrected position of the tooltip if that tooltip is visible
     if(!this.isHidden(this.elem)) {
-        this.positioningElem();
+        this.setBtnCords();
         this.setElemCords();
+        this.positioningElem();
         this.checkElemCords();
+
     }
 
+    //check global param torn on/off visibility of tooltips
     if(this.tooltipVisible) {
         this.showTooltip();
     } else {
@@ -55,14 +60,23 @@ Tooltip.prototype.onButtonClick = function() {
   var self = this;
   for(var i = 0; i < this.buttonEl.length; i++) {
       this.buttonEl[i].addEventListener('click', function(){
+
           if(!self.tooltipVisible) {
               self.showTooltip();
+              if(!self.isHidden(self.elem)) {
+                  self.setBtnCords();
+                  self.setElemCords();
+                  self.checkElemCords();
+                  self.positioningElem();
+              }
+
           } else {
               self.hideTooltip();
           }
 
       });
   }
+
 };
 
 Tooltip.prototype.showTooltip = function() {
@@ -75,6 +89,16 @@ Tooltip.prototype.hideTooltip = function() {
   this.elem.style.display = 'none';
 };
 
+
+Tooltip.prototype.checkDataAttrVisible = function() {
+    if(this.elem.dataset.visible) {
+       if(this.elem.dataset.visible === 'true') {
+           this.showTooltip();
+       } else {
+           this.hideTooltip();
+       }
+    }
+};
 
 Tooltip.prototype.setBtnCords = function() {
     var cords = {};
@@ -137,13 +161,16 @@ Tooltip.prototype.positioningElem = function() {
 
 
 Tooltip.prototype.checkElemCords = function() {
-   if(this.elemCords[0].top <= 0) {
-       this.toggleClass(this.elem, 'top', 'bottom');
-       this.positioningElem();
-   } else if(this.elemCords[0].left <= 0) {
-       this.toggleClass(this.elem, 'left', 'right');
-       this.positioningElem();
-   }
+    for(var i = 0; i < this.elemCords.length; i++) {
+        if(this.elemCords[i].top < 0) {
+            this.toggleClass(this.elem, 'top', 'bottom');
+            this.positioningElem();
+        } else if(this.elemCords[i].left < 0) {
+            this.toggleClass(this.elem, 'left', 'right');
+            this.positioningElem();
+        }
+    }
+
 };
 
 
@@ -151,3 +178,7 @@ Tooltip.prototype.toggleClass = function(elem, oldClass, newClass) {
     elem.classList.remove(oldClass);
     elem.classList.add(newClass);
 };
+
+
+
+
