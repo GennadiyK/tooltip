@@ -5,6 +5,8 @@ function Tooltip(elem) {
     this.buttonElCords = [];
     this.elemCords = [];
     this.tooltipVisible = false;
+    this.timePassed = 0;
+    this.dur = 600;
 }
 
 Tooltip.prototype.init = function() {
@@ -15,13 +17,14 @@ Tooltip.prototype.init = function() {
     this.checkDataAttrVisible();
 
 
+
+
     //corrected position of the tooltip if that tooltip is visible
     if(!this.isHidden(this.elem)) {
         this.setBtnCords();
-        this.setElemCords();
         this.positioningElem();
         this.checkElemCords();
-
+        this.animation(this.elem, 'opacity', 0, 1, this.dur);
     }
 
     //check global param torn on/off visibility of tooltips
@@ -33,9 +36,8 @@ Tooltip.prototype.init = function() {
 
     window.addEventListener('resize', function(){
         this.setBtnCords();
-        this.setElemCords();
-        this.checkElemCords();
         this.positioningElem();
+        this.checkElemCords();
     }.bind(this));
 };
 
@@ -65,9 +67,8 @@ Tooltip.prototype.onButtonClick = function() {
               self.showTooltip();
               if(!self.isHidden(self.elem)) {
                   self.setBtnCords();
-                  self.setElemCords();
-                  self.checkElemCords();
                   self.positioningElem();
+                  self.checkElemCords();
               }
 
           } else {
@@ -80,13 +81,18 @@ Tooltip.prototype.onButtonClick = function() {
 };
 
 Tooltip.prototype.showTooltip = function() {
-  this.tooltipVisible = true;
-  this.elem.style.display = 'block';
+    this.tooltipVisible = true;
+    this.elem.style.display = 'block';
+    this.animation(this.elem, 'opacity', 0, 1, this.dur);
 };
 
 Tooltip.prototype.hideTooltip = function() {
-  this.tooltipVisible = false;
-  this.elem.style.display = 'none';
+    this.tooltipVisible = false;
+    this.animation(this.elem, 'opacity', 1, 0, this.dur);
+    setTimeout(function(){
+        this.elem.style.display = 'none';
+    }.bind(this), this.dur);
+
 };
 
 
@@ -161,22 +167,57 @@ Tooltip.prototype.positioningElem = function() {
 
 
 Tooltip.prototype.checkElemCords = function() {
+    this.setElemCords();
     for(var i = 0; i < this.elemCords.length; i++) {
         if(this.elemCords[i].top < 0) {
             this.toggleClass(this.elem, 'top', 'bottom');
-            this.positioningElem();
-        } else if(this.elemCords[i].left < 0) {
-            this.toggleClass(this.elem, 'left', 'right');
-            this.positioningElem();
+
+        } else {
+            this.toggleClass(this.elem, 'bottom', 'top');
         }
+
+        if(this.elemCords[i].left < 0) {
+            this.toggleClass(this.elem, 'left', 'right');
+        } else {
+            this.toggleClass(this.elem, 'right', 'left');
+        }
+
     }
+    this.positioningElem();
 
 };
 
 
 Tooltip.prototype.toggleClass = function(elem, oldClass, newClass) {
-    elem.classList.remove(oldClass);
-    elem.classList.add(newClass);
+    if(elem.classList.contains(oldClass)) {
+        elem.classList.remove(oldClass);
+        elem.classList.add(newClass);
+    }
+};
+
+Tooltip.prototype.animation = function (elem, prop, start, finish, dur) {
+    var startTime = Date.now();
+    var path = finish - start;
+
+
+    var timer = setInterval(function(){
+        var t = (Date.now() - startTime) / dur;
+
+
+        if(t >= 1) {
+            this.timePassed = finish;
+            clearInterval(timer);
+
+        } else {
+            this.timePassed = start + (t * path);
+        }
+
+
+
+        elem.style[prop] = this.timePassed;
+
+    }.bind(this), 5);
+
 };
 
 
