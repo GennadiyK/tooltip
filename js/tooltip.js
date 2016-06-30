@@ -88,10 +88,11 @@ Tooltip.prototype.showTooltip = function() {
 
 Tooltip.prototype.hideTooltip = function() {
     this.tooltipVisible = false;
-    this.animation(this.elem, 'opacity', 1, 0, this.dur);
-    setTimeout(function(){
-        this.elem.style.display = 'none';
-    }.bind(this), this.dur);
+    var self = this;
+    this.animation(this.elem, 'opacity', 1, 0, this.dur, function(){
+        self.elem.style.display = 'none';
+    });
+
 
 };
 
@@ -195,7 +196,7 @@ Tooltip.prototype.toggleClass = function(elem, oldClass, newClass) {
     }
 };
 
-Tooltip.prototype.animation = function (elem, prop, start, finish, dur) {
+Tooltip.prototype.animation = function (elem, prop, start, finish, dur, collback) {
     var startTime = Date.now();
     var path = finish - start;
 
@@ -207,7 +208,9 @@ Tooltip.prototype.animation = function (elem, prop, start, finish, dur) {
         if(t >= 1) {
             this.timePassed = finish;
             clearInterval(timer);
-
+            if(collback instanceof Function) {
+                collback();
+            }
         } else {
             this.timePassed = start + (t * path);
         }
