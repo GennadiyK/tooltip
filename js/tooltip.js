@@ -196,7 +196,7 @@ Tooltip.prototype.toggleClass = function(elem, oldClass, newClass) {
     }
 };
 
-Tooltip.prototype.animation = function (elem, prop, start, finish, dur, collback) {
+Tooltip.prototype.animation = function (elem, prop, start, finish, dur, callback) {
     var startTime = Date.now();
     var path = finish - start;
 
@@ -208,8 +208,8 @@ Tooltip.prototype.animation = function (elem, prop, start, finish, dur, collback
         if(t >= 1) {
             this.timePassed = finish;
             clearInterval(timer);
-            if(collback instanceof Function) {
-                collback();
+            if(callback instanceof Function) {
+                callback();
             }
         } else {
             this.timePassed = start + (t * path);
